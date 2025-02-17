@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import upload_resume, home  # Import views
+from .views import upload_resume # Import views
 
 urlpatterns = [
-    path("", home, name="home"),  # Homepage
     path("upload/", upload_resume, name="upload_resume"),  # Upload endpoint
 ]

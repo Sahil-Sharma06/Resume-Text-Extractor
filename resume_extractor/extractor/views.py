@@ -1,11 +1,7 @@
-from django.http import HttpResponse
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.core.files.storage import default_storage
-from .utils import extract_text_from_pdf
-from .llms_utils import get_structured_resume 
-def home(request):
-    return HttpResponse("<h1>Welcome to Resume Extractor API</h1><p>Go to <a href='/api/upload/'>API Upload</a></p>")
+from .utils import extract_structured_resume
 
 @api_view(["POST"])
 def upload_resume(request):
@@ -15,7 +11,6 @@ def upload_resume(request):
     file = request.FILES["resume"]
     file_path = default_storage.save(f"resumes/{file.name}", file)
 
-    extracted_text = extract_text_from_pdf(default_storage.path(file_path))
-    structured_data = get_structured_resume(extracted_text)  # Use LLaMA API
+    structured_data = extract_structured_resume(default_storage.path(file_path))
 
     return Response({"structured_resume": structured_data})

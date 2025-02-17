@@ -1,22 +1,51 @@
 import fitz  # PyMuPDF
+import re
+import pdfplumber
+import nltk
+
+nltk.download('punkt')
+
+# Define common resume section headings
+RESUME_HEADINGS = [
+    "Name", "Contact", "Summary", "Education", "Experience",
+    "Projects", "Skills", "Certifications", "Languages"
+]
 
 def extract_text_from_pdf(pdf_path):
-    """
-    Extracts text from a given PDF file.
+    """Extracts text from a given PDF file."""
+    text = ""
 
-    Args:
-        pdf_path (str): The path to the PDF file.
+    # Use pdfplumber for better text extraction
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() + "\n"
 
-    Returns:
-        str: Extracted text from the PDF.
-    """
-    text = ""  # Initialize an empty string for storing extracted text
+    return text if text else "No text found"
 
-    # Open the PDF file
-    doc = fitz.open(pdf_path)
+def extract_sections(text):
+    """Extracts sections from resume text based on keywords (headings)."""
+    structured_resume = {}
+    lines = text.split("\n")
 
-    # Iterate through each page in the document
-    for page in doc:
-        text += page.get_text("text") + "\n"  # Extract text from each page
+    current_section = None
 
-    return text  # Return the extracted text
+    for line in lines:
+        line = line.strip()
+
+        # Match if the line is a known heading (case-insensitive)
+        if any(re.match(rf"^{heading}", line, re.IGNORECASE) for heading in RESUME_HEADINGS):
+            current_section = line.strip(":")  # Normalize heading
+            structured_resume[current_section] = []
+        elif current_section:
+            structured_resume[current_section].append(line)
+
+    # Convert lists to strings
+    for key in structured_resume:
+        structured_resume[key] = "\n".join(structured_resume[key])
+
+    return structured_resume
+
+def extract_structured_resume(pdf_path):
+    """Extracts structured resume data from a PDF."""
+    raw_text = extract_text_from_pdf(pdf_path)
+    return extract_sections(raw_text)
