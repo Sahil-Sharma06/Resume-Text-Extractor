@@ -201,13 +201,3 @@ git push origin feature-branch
 ```
 
 ---
-
-## 📜 License
-This project is licensed under **MIT License**.
-
----
-
-## 🌟 Show Your Support
-If you liked this project, ⭐ **star the repository** and follow for more cool projects! 🚀🔥
-
----
